@@ -40,14 +40,6 @@ export default function AdminPosts() {
        const [isLoading, setIsLoading] = useState(true);
        const [postToDelete, setPostToDelete] = useState<string | null>(null);
 
-       const sidebarItems: SidebarItem[] = [
-              { title: 'Reports', active: false, path: '/dashboard/reports', icon: <TbMessageReport /> },
-              { title: 'Users', active: false, path: '/dashboard/users', icon: <FiUsersIcon /> },
-              { title: 'Contests', active: false, path: '/dashboard/contests', icon: <PiRankingBold /> },
-              { title: 'Posts', active: true, path: '/dashboard/posts', icon: <TfiGallery /> },
-              { title: 'Settings', active: false, path: '/dashboard/settings', icon: <FiSettings /> },
-              { title: 'Log out', active: false, path: '/dashboard/logout', icon: <FiLogOut /> },
-       ];
 
        useEffect(() => {
               // Simulate API fetch
@@ -105,7 +97,7 @@ export default function AdminPosts() {
 
        return (
               <div className="flex min-h-screen w-full absolute bg-font pt-12 md:pt-0">
-                     <Sidebar items={sidebarItems} />
+                     
                      <main className="flex-1 md:ml-64">
                             <div className="min-h-screen bg-gray-50 font-garet p-4 md:p-8">
                                    <div className="max-w-7xl mx-auto">

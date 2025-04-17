@@ -68,18 +68,11 @@ export default function UserDashboard() {
        const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
        const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
 
-       const sidebarItems: SidebarItem[] = [
-              { title: 'Reports', active: false, path: '/dashboard/reports', icon: <TbMessageReport /> },
-              { title: 'Users', active: true, path: '/dashboard/users' , icon: <FiUsers />},
-              { title: 'Contests', active: false, path: '/dashboard/contests' , icon: <PiRankingBold />},
-              { title: 'Posts', active: false, path: '/dashboard/posts', icon: <TfiGallery /> },
-              { title: 'Settings', active: false, path: '/dashboard/settings', icon: <FiSettings /> },
-              { title: 'Log out', active: false, path: '/dashboard/logout' , icon: <FiLogOut />},
-       ];
+       
 
        return (
               <div className="flex min-h-screen w-full absolute bg-font pt-12 md:pt-0">
-                     <Sidebar items={sidebarItems} />
+                     
                      <main className="flex-1 md:ml-64 p-4 md:p-8">
                             <div className="max-w-6xl mx-auto">
                                    {/* Header */}

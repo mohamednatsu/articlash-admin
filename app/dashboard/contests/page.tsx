@@ -146,7 +146,7 @@ export default function ManageContests() {
 
        return (
               <div className="flex min-h-screen w-full absolute bg-font pt-12 md:pt-0">
-                     <Sidebar items={sidebarItems} />
+                     
                      <main className="flex-1 md:ml-64">
                             <div className="min-h-screen bg-gray-50 font-garet p-4 md:p-8">
                                    <div className="max-w-6xl mx-auto">

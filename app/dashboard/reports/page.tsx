@@ -55,14 +55,6 @@ const ReportsPage = () => {
        const [searchTerm, setSearchTerm] = useState('');
        const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'resolved'>('all');
 
-       const sidebarItems: SidebarItem[] = [
-              { title: 'Reports', active: true, path: '/dashboard/reports', icon: <TbMessageReport /> },
-              { title: 'Users', active: false, path: '/dashboard/users', icon: <FiUsersIcon /> },
-              { title: 'Contests', active: false, path: '/dashboard/contests', icon: <PiRankingBold /> },
-              { title: 'Posts', active: false, path: '/dashboard/posts', icon: <TfiGallery /> },
-              { title: 'Settings', active: false, path: '/dashboard/settings', icon: <FiSettings /> },
-              { title: 'Log out', active: false, path: '/dashboard/logout', icon: <FiLogOut /> },
-       ];
 
        const filteredReports = reports.filter(report => {
               const matchesSearch = report.reportingUser.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -92,7 +84,7 @@ const ReportsPage = () => {
 
        return (
               <div className="flex min-h-screen w-full bg-gray-50 pt-12 md:pt-0">
-                     <Sidebar items={sidebarItems} />
+                     
                      <motion.main
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
