@@ -53,7 +53,7 @@ export default function HomePage() {
               transition={{ duration: 0.6 }}
               className="text-5xl font-waterlily md:text-6xl font-bold text-secondary mb-6"
             >
-              Welcome to <span className="text-primary">Articlash</span>
+              Welcome to <span className="text-primary">Articlash Admin</span>
             </motion.h1>
             
             <motion.p 
