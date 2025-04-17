@@ -36,7 +36,7 @@ export default function Page() {
 
                                           <div className="">
                                                  <MainButton>
-                                                        Login
+                                                        <Link href={"/dashboard/reports"} className='text-white'>Login</Link>
                                                  </MainButton>
                                           </div>
                                    </div>

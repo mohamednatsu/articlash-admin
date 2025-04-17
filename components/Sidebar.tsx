@@ -121,7 +121,7 @@ const Sidebar: React.FC<SidebarProps> = ({ items }) => {
                                                  </motion.ul>
 
                                                  {/* Action buttons at bottom */}
-                                                 <div className="md:mt-[110%] mt-[60%] pt-4 border-t border-primary border-opacity-20">
+                                                 <div className="md:mt-[110%] mt-[50%] pt-4 border-t border-primary border-opacity-20">
                                                         {actionItems.map((item) => (
                                                                <motion.div
                                                                       key={item.title}
