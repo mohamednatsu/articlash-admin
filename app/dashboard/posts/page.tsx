@@ -83,7 +83,7 @@ export default function AdminPosts() {
                                    likes: 2100,
                                    comments: 350,
                                    category: 'traditional',
-                                   image: 'https://images.unsplash.com/photo-1579762715459-5a068c289f23?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+                                   image: 'https://images.unsplash.com/photo-1606041008023-472dfb5e530f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
                                    createdAt: '2023-07-10'
                             }
                      ]);
