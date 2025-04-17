@@ -164,8 +164,8 @@ const ReportsPage = () => {
                                                                                     </div>
                                                                                     <h2 className="text-xl font-bold text-gray-800">Report #{report.id}</h2>
                                                                              </div>
-                                                                             <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(report.status)}`}>
-                                                                                    {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
+                                                                             <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(report.status || 'pending')}`}>
+                                                                                    {(report.status ?? 'pending').charAt(0).toUpperCase() + (report.status ?? 'pending').slice(1)}
                                                                              </span>
                                                                       </div>
 
