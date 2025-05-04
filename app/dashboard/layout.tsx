@@ -26,8 +26,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
        ];
        return (
               <div>
-                     {/* Add your global layout components here */}
-                     {/* For example, a sidebar or header */}
+                     
                      <Sidebar items={sidebarItems} />
                      {/* Sidebar and Header components can be added here */}
                      {children}

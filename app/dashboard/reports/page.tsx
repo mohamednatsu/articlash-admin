@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Report, SidebarItem } from '@/types';
-import Sidebar from "@/components/Sidebar";
 import {
        TbMessageReport,
        TbCheck,
@@ -12,12 +11,18 @@ import {
        TbUser,
        TbCalendar,
        TbFileDescription,
-       TbId
+       TbId,
+       TbMessage
 } from "react-icons/tb";
-import { FiLogOut, FiSettings, FiUsers as FiUsersIcon } from "react-icons/fi";
-import { PiRankingBold } from "react-icons/pi";
-import { TfiGallery } from "react-icons/tfi";
 import { FaRegFlag } from "react-icons/fa";
+
+interface Comment {
+       id: number;
+       text: string;
+       createdAt: string;
+       adminId: number;
+       reportId: number;
+}
 
 const ReportsPage = () => {
        const [reports, setReports] = useState<Report[]>([
@@ -50,11 +55,75 @@ const ReportsPage = () => {
               }
        ]);
 
+       const [comments, setComments] = useState<Record<number, Comment[]>>({});
+       const [newComment, setNewComment] = useState('');
        const [selectedReport, setSelectedReport] = useState<Report | null>(null);
        const [actionType, setActionType] = useState<'approve' | 'reject' | null>(null);
        const [searchTerm, setSearchTerm] = useState('');
        const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'resolved'>('all');
+       const [showCommentModal, setShowCommentModal] = useState(false);
+       const [currentReportId, setCurrentReportId] = useState<number | null>(null);
 
+       // Simulate fetching comments for a report
+       const fetchComments = async (reportId: number) => {
+              // In a real app, you would fetch from your API
+              const mockComments: Comment[] = [
+                     {
+                            id: 1,
+                            text: 'This seems like a valid complaint. Let\'s review the content.',
+                            createdAt: '2025-02-02T10:30:00',
+                            adminId: 1,
+                            reportId: reportId
+                     },
+                     {
+                            id: 2,
+                            text: 'I\'ve checked the post and it does violate our guidelines.',
+                            createdAt: '2025-02-02T11:15:00',
+                            adminId: 2,
+                            reportId: reportId
+                     }
+              ];
+              setComments(prev => ({ ...prev, [reportId]: mockComments }));
+       };
+
+       // Handle adding a new comment
+       const handleAddComment = async () => {
+              if (!newComment.trim() || !currentReportId) return;
+
+              // In a real app, you would POST to your API
+              const newCommentObj: Comment = {
+                     id: Date.now(), // Temporary ID
+                     text: newComment,
+                     createdAt: new Date().toISOString(),
+                     adminId: 1, // This would be the logged-in admin's ID
+                     reportId: currentReportId
+              };
+
+              setComments(prev => ({
+                     ...prev,
+                     [currentReportId]: [...(prev[currentReportId] || []), newCommentObj]
+              }));
+
+              // Here you would call your API to save the comment
+              try {
+                     // await fetch('/api/reports/comments', {
+                     //   method: 'POST',
+                     //   headers: {
+                     //     'Content-Type': 'application/json',
+                     //   },
+                     //   body: JSON.stringify({
+                     //     reportId: currentReportId,
+                     //     text: newComment
+                     //   })
+                     // });
+                     console.log('Comment submitted:', newCommentObj);
+              } catch (error) {
+                     console.error('Error submitting comment:', error);
+              }
+
+              setNewComment('');
+              setShowCommentModal(false);
+       };
 
        const filteredReports = reports.filter(report => {
               const matchesSearch = report.reportingUser.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -82,9 +151,16 @@ const ReportsPage = () => {
               }
        };
 
+       const openCommentModal = (reportId: number) => {
+              setCurrentReportId(reportId);
+              setShowCommentModal(true);
+              if (!comments[reportId]) {
+                     fetchComments(reportId);
+              }
+       };
+
        return (
               <div className="flex min-h-screen w-full bg-gray-50 pt-12 md:pt-0">
-                     
                      <motion.main
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -189,49 +265,64 @@ const ReportsPage = () => {
                                                                                     </div>
                                                                                     <p className="text-gray-600">{report.reason}</p>
                                                                              </div>
-
-                                                                             <div className="bg-gray-50 p-4 rounded-lg">
-                                                                                    <div className="flex items-center gap-2 mb-2">
-                                                                                           <TbId className="text-primary" />
-                                                                                           <h3 className="font-medium text-gray-800">Post ID</h3>
-                                                                                    </div>
-                                                                                    <p className="text-gray-600 font-mono text-sm">{report.postId}</p>
-                                                                             </div>
                                                                       </div>
 
-                                                                      {report.status === 'pending' && (
-                                                                             <div className="mt-6 flex flex-wrap gap-3">
-                                                                                    <motion.button
-                                                                                           whileHover={{ scale: 1.03 }}
-                                                                                           whileTap={{ scale: 0.97 }}
-                                                                                           onClick={() => {
-                                                                                                  setSelectedReport(report);
-                                                                                                  setActionType('approve');
-                                                                                           }}
-                                                                                           className="px-4 py-2 bg-green-500 text-white rounded-lg font-medium flex items-center gap-2"
-                                                                                    >
-                                                                                           <TbCheck /> Approve
-                                                                                    </motion.button>
-                                                                                    <motion.button
-                                                                                           whileHover={{ scale: 1.03 }}
-                                                                                           whileTap={{ scale: 0.97 }}
-                                                                                           onClick={() => {
-                                                                                                  setSelectedReport(report);
-                                                                                                  setActionType('reject');
-                                                                                           }}
-                                                                                           className="px-4 py-2 bg-red-500 text-white rounded-lg font-medium flex items-center gap-2"
-                                                                                    >
-                                                                                           <TbX /> Reject
-                                                                                    </motion.button>
-                                                                                    <motion.button
-                                                                                           whileHover={{ scale: 1.03 }}
-                                                                                           whileTap={{ scale: 0.97 }}
-                                                                                           className="px-4 py-2 bg-primary text-white rounded-lg font-medium flex items-center gap-2"
-                                                                                    >
-                                                                                           <TbEye /> View Post
-                                                                                    </motion.button>
+                                                                      {/* Comments preview (show last comment if exists) */}
+                                                                      {comments[report.id]?.length > 0 && (
+                                                                             <div className="mb-4 bg-blue-50 p-3 rounded-lg">
+                                                                                    <div className="flex items-center gap-2 mb-2">
+                                                                                           <TbMessage className="text-primary" />
+                                                                                           <h3 className="font-medium text-gray-800">Latest Comment</h3>
+                                                                                    </div>
+                                                                                    <p className="text-gray-600 line-clamp-2">
+                                                                                           {comments[report.id][comments[report.id].length - 1].text}
+                                                                                    </p>
                                                                              </div>
                                                                       )}
+
+                                                                      <div className="mt-6 flex flex-wrap gap-3">
+                                                                             {report.status === 'pending' && (
+                                                                                    <>
+                                                                                           <motion.button
+                                                                                                  whileHover={{ scale: 1.03 }}
+                                                                                                  whileTap={{ scale: 0.97 }}
+                                                                                                  onClick={() => {
+                                                                                                         setSelectedReport(report);
+                                                                                                         setActionType('approve');
+                                                                                                  }}
+                                                                                                  className="px-4 py-2 bg-green-500 text-white rounded-lg font-medium flex items-center gap-2"
+                                                                                           >
+                                                                                                  <TbCheck /> Approve
+                                                                                           </motion.button>
+                                                                                           <motion.button
+                                                                                                  whileHover={{ scale: 1.03 }}
+                                                                                                  whileTap={{ scale: 0.97 }}
+                                                                                                  onClick={() => {
+                                                                                                         setSelectedReport(report);
+                                                                                                         setActionType('reject');
+                                                                                                  }}
+                                                                                                  className="px-4 py-2 bg-red-500 text-white rounded-lg font-medium flex items-center gap-2"
+                                                                                           >
+                                                                                                  <TbX /> Reject
+                                                                                           </motion.button>
+                                                                                    </>
+                                                                             )}
+                                                                             <motion.button
+                                                                                    whileHover={{ scale: 1.03 }}
+                                                                                    whileTap={{ scale: 0.97 }}
+                                                                                    onClick={() => openCommentModal(report.id)}
+                                                                                    className="px-4 py-2 bg-primary text-white rounded-lg font-medium flex items-center gap-2"
+                                                                             >
+                                                                                    <TbMessage /> {comments[report.id]?.length ? 'View Comments' : 'Add Comment'}
+                                                                             </motion.button>
+                                                                             <motion.button
+                                                                                    whileHover={{ scale: 1.03 }}
+                                                                                    whileTap={{ scale: 0.97 }}
+                                                                                    className="px-4 py-2 bg-gray-600 text-white rounded-lg font-medium flex items-center gap-2"
+                                                                             >
+                                                                                    <TbEye /> View Post
+                                                                             </motion.button>
+                                                                      </div>
                                                                </div>
                                                         </motion.div>
                                                  ))}
@@ -296,6 +387,78 @@ const ReportsPage = () => {
                                                                              </>
                                                                       )}
                                                                </motion.button>
+                                                        </div>
+                                                 </motion.div>
+                                          </motion.div>
+                                   )}
+                            </AnimatePresence>
+
+                            {/* Comment Modal */}
+                            <AnimatePresence>
+                                   {showCommentModal && currentReportId && (
+                                          <motion.div
+                                                 initial={{ opacity: 0 }}
+                                                 animate={{ opacity: 1 }}
+                                                 exit={{ opacity: 0 }}
+                                                 className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+                                          >
+                                                 <motion.div
+                                                        initial={{ scale: 0.9 }}
+                                                        animate={{ scale: 1 }}
+                                                        exit={{ scale: 0.9 }}
+                                                        className="bg-white rounded-xl p-6 w-full max-w-md max-h-[80vh] flex flex-col"
+                                                 >
+                                                        <div className="flex justify-between items-center mb-4">
+                                                               <h2 className="text-xl font-bold text-gray-800">Comments</h2>
+                                                               <button
+                                                                      onClick={() => setShowCommentModal(false)}
+                                                                      className="text-gray-500 hover:text-gray-700"
+                                                               >
+                                                                      <TbX className="text-2xl" />
+                                                               </button>
+                                                        </div>
+
+                                                        <div className="flex-1 overflow-y-auto mb-4 space-y-4">
+                                                               {comments[currentReportId]?.length ? (
+                                                                      comments[currentReportId].map(comment => (
+                                                                             <div key={comment.id} className="bg-gray-50 p-3 rounded-lg">
+                                                                                    <div className="flex justify-between items-start mb-1">
+                                                                                           <span className="text-sm font-medium text-gray-700">Admin #{comment.adminId}</span>
+                                                                                           <span className="text-xs text-gray-500">
+                                                                                                  {new Date(comment.createdAt).toLocaleString()}
+                                                                                           </span>
+                                                                                    </div>
+                                                                                    <p className="text-gray-600">{comment.text}</p>
+                                                                             </div>
+                                                                      ))
+                                                               ) : (
+                                                                      <p className="text-gray-500 text-center py-4">No comments yet</p>
+                                                               )}
+                                                        </div>
+
+                                                        <div className="border-t pt-4">
+                                                               <textarea
+                                                                      value={newComment}
+                                                                      onChange={(e) => setNewComment(e.target.value)}
+                                                                      placeholder="Add a comment..."
+                                                                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary mb-3"
+                                                                      rows={3}
+                                                               />
+                                                               <div className="flex justify-end gap-3">
+                                                                      <button
+                                                                             onClick={() => setShowCommentModal(false)}
+                                                                             className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                                                                      >
+                                                                             Cancel
+                                                                      </button>
+                                                                      <button
+                                                                             onClick={handleAddComment}
+                                                                             className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                                                                             disabled={!newComment.trim()}
+                                                                      >
+                                                                             Post Comment
+                                                                      </button>
+                                                               </div>
                                                         </div>
                                                  </motion.div>
                                           </motion.div>

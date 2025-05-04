@@ -8,6 +8,8 @@ import { TbMessageReport } from "react-icons/tb";
 import { FiLogOut, FiSettings, FiUsers as FiUsersIcon } from "react-icons/fi";
 import { PiRankingBold } from "react-icons/pi";
 import { TfiGallery } from "react-icons/tfi";
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 type ContestStatus = 'upcoming' | 'active' | 'completed' | 'draft';
 
@@ -18,7 +20,7 @@ interface Contest {
        status: ContestStatus;
        members: number;
        duration: string;
-       startDate: string;
+       startDate: string; 
        coverImage?: string;
 }
 
@@ -30,8 +32,8 @@ export default function ManageContests() {
                      category: 'traditional',
                      status: 'active',
                      members: 139,
-                     duration: '2 hours',
-                     startDate: '13/2/2025',
+                     duration: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(), // 4 hours from now
+                     startDate: new Date('2025-02-13T00:00:00').toISOString(),
                      coverImage: 'https://images.unsplash.com/photo-1606041008023-472dfb5e530f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'
               },
               {
@@ -40,8 +42,8 @@ export default function ManageContests() {
                      category: 'digital',
                      status: 'upcoming',
                      members: 89,
-                     duration: '2 hours',
-                     startDate: '13/2/2025',
+                     duration: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(), // 4 hours from now
+                     startDate: new Date('2025-02-13T00:00:00').toISOString(),
                      coverImage: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'
               },
               {
@@ -50,8 +52,8 @@ export default function ManageContests() {
                      category: 'traditional',
                      status: 'completed',
                      members: 215,
-                     duration: '3 hours',
-                     startDate: '10/1/2025',
+                     duration: new Date(Date.now() + 5 * 60 * 60 * 1000).toISOString(), // 5 hours from now
+                     startDate: new Date('2025-01-10T00:00:00').toISOString(),
                      coverImage: 'https://images.unsplash.com/photo-1606041008023-472dfb5e530f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'
               }
        ]);
@@ -70,6 +72,7 @@ export default function ManageContests() {
               coverImage: ''
        });
        const [previewImage, setPreviewImage] = useState<string | null>(null);
+       const [errors, setErrors] = useState<Record<string, string>>({});
        const fileInputRef = useRef<HTMLInputElement>(null);
 
        const statusColors = {
@@ -79,13 +82,45 @@ export default function ManageContests() {
               draft: 'bg-blue-500'
        };
 
+
+       function hoursBetween(date1: Date, date2: Date) {
+              const diffInMs = Math.abs(new Date(date2).getTime() - new Date(date1).getTime());
+              const diffInHours = diffInMs / (1000 * 60 * 60);
+              return diffInHours;
+       }
+
+       const validateForm = (contest: Partial<Contest>) => {
+              const newErrors: Record<string, string> = {};
+
+              if (!contest.title?.trim()) {
+                     newErrors.title = 'Title is required';
+              }
+
+              if (!contest.startDate) {
+                     newErrors.startDate = 'Start date is required';
+              }
+
+              if (!contest.duration) {
+                     newErrors.duration = 'Duration is required';
+              } else if (new Date(contest.duration) <= new Date(contest.startDate || '')) {
+                     newErrors.duration = 'Duration must be after start date';
+              }
+
+              if (!contest.coverImage) {
+                     newErrors.coverImage = 'Cover image is required';
+              }
+
+              setErrors(newErrors);
+              return Object.keys(newErrors).length === 0;
+       };
+
        const handleDelete = (id: string) => {
               setContests(contests.filter(contest => contest.id !== id));
               setIsDeleteModalOpen(false);
        };
 
        const handleSaveEdit = () => {
-              if (editingContest) {
+              if (editingContest && validateForm(editingContest)) {
                      setContests(contests.map(contest =>
                             contest.id === editingContest.id ? editingContest : contest
                      ));
@@ -111,23 +146,47 @@ export default function ManageContests() {
        };
 
        const handleAddContest = () => {
-              setContests([...contests, {
-                     ...newContest,
-                     id: Math.random().toString(36).substring(2, 9),
-                     members: Math.floor(Math.random() * 200) + 50,
-                     coverImage: previewImage || 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'
-              }]);
-              setNewContest({
-                     title: '',
-                     category: 'traditional',
-                     status: 'draft',
-                     members: 0,
-                     duration: '',
-                     startDate: '',
-                     coverImage: ''
+              if (validateForm(newContest)) {
+                     setContests([...contests, {
+                            ...newContest,
+                            id: Math.random().toString(36).substring(2, 9),
+                            members: Math.floor(Math.random() * 200) + 50,
+                            coverImage: previewImage || 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'
+                     }]);
+                     setNewContest({
+                            title: '',
+                            category: 'traditional',
+                            status: 'draft',
+                            members: 0,
+                            duration: '',
+                            startDate: '',
+                            coverImage: ''
+                     });
+                     setPreviewImage(null);
+                     setIsAddModalOpen(false);
+              }
+       };
+
+       const formatDate = (dateString: string) => {
+              if (!dateString) return '';
+              const date = new Date(dateString);
+              return isNaN(date.getTime()) ? dateString : date.toLocaleString('en-GB', {
+                     day: '2-digit',
+                     month: '2-digit',
+                     year: 'numeric',
+                     hour: '2-digit',
+                     minute: '2-digit'
               });
-              setPreviewImage(null);
-              setIsAddModalOpen(false);
+       };
+
+       const calculateDuration = (startDate: string, endDate: string) => {
+              if (!startDate || !endDate) return '';
+              const start = new Date(startDate);
+              const end = new Date(endDate);
+              const diff = end.getTime() - start.getTime();
+              const hours = Math.floor(diff / (1000 * 60 * 60));
+              const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+              return `${hours}h ${minutes}m`;
        };
 
        const categoryIcons = {
@@ -146,7 +205,8 @@ export default function ManageContests() {
 
        return (
               <div className="flex min-h-screen w-full absolute bg-font pt-12 md:pt-0">
-                     
+                     <Sidebar items={sidebarItems} />
+
                      <main className="flex-1 md:ml-64">
                             <div className="min-h-screen bg-gray-50 font-garet p-4 md:p-8">
                                    <div className="max-w-6xl mx-auto">
@@ -222,21 +282,27 @@ export default function ManageContests() {
 
                                                                                            <div className="space-y-3 text-gray-700">
                                                                                                   <div className="flex items-center gap-2">
+                                                                                                         <FiCalendar className="text-primary" />
+                                                                                                         <span>
+                                                                                                                <strong>Starts:</strong> {formatDate(contest.startDate)}
+                                                                                                         </span>
+                                                                                                  </div>
+                                                                                                  <div className="flex items-center gap-2">
+                                                                                                         <FiCalendar className="text-primary" />
+                                                                                                         <span>
+                                                                                                                <strong>Ends:</strong> {formatDate(contest.duration)}
+                                                                                                         </span>
+                                                                                                  </div>
+                                                                                                  <div className="flex items-center gap-2">
                                                                                                          <FiClock className="text-primary" />
                                                                                                          <span>
-                                                                                                                <strong>Duration:</strong> {contest.duration}
+                                                                                                                <strong>Duration:</strong> {hoursBetween(new Date(contest.startDate), new Date(contest.duration)).toFixed()} hours
                                                                                                          </span>
                                                                                                   </div>
                                                                                                   <div className="flex items-center gap-2">
                                                                                                          <FiUsers className="text-primary" />
                                                                                                          <span>
                                                                                                                 <strong>Members:</strong> {contest.members}
-                                                                                                         </span>
-                                                                                                  </div>
-                                                                                                  <div className="flex items-center gap-2">
-                                                                                                         <FiCalendar className="text-primary" />
-                                                                                                         <span>
-                                                                                                                <strong>Start Date:</strong> {contest.startDate}
                                                                                                          </span>
                                                                                                   </div>
                                                                                            </div>
@@ -273,7 +339,7 @@ export default function ManageContests() {
                                    {/* Edit Modal */}
                                    {editingContest && (
                                           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                                                 <div className="bg-white rounded-xl p-6 w-full max-w-md">
+                                                 <div className="bg-white rounded-xl my-6 p-6 w-full max-w-md">
                                                         <h2 className="text-2xl font-bold text-secondary mb-4">Edit Contest</h2>
 
                                                         {/* Cover Image Upload */}
@@ -314,6 +380,7 @@ export default function ManageContests() {
                                                                              </div>
                                                                       )}
                                                                </div>
+                                                               {errors.coverImage && <p className="text-red-500 text-sm mt-1">{errors.coverImage}</p>}
                                                         </div>
 
                                                         <div className="space-y-4">
@@ -325,6 +392,7 @@ export default function ManageContests() {
                                                                              onChange={e => setEditingContest({ ...editingContest, title: e.target.value })}
                                                                              className="w-full p-2 border border-gray-300 rounded"
                                                                       />
+                                                                      {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
                                                                </div>
 
                                                                <div>
@@ -353,24 +421,47 @@ export default function ManageContests() {
                                                                       </select>
                                                                </div>
 
+                                                               {/* Start Date Picker */}
                                                                <div>
-                                                                      <label className="block text-gray-700 mb-1">Duration</label>
-                                                                      <input
-                                                                             type="text"
-                                                                             value={editingContest.duration}
-                                                                             onChange={e => setEditingContest({ ...editingContest, duration: e.target.value })}
+                                                                      <label className="block text-gray-700 mb-1">Start Date & Time</label>
+                                                                      <DatePicker
+                                                                             selected={editingContest.startDate ? new Date(editingContest.startDate) : null}
+                                                                             onChange={(date: Date | null) => date && setEditingContest({
+                                                                                    ...editingContest,
+                                                                                    startDate: date.toISOString()
+                                                                             })}
+                                                                             showTimeSelect
+                                                                             timeFormat="HH:mm"
+                                                                             timeIntervals={15}
+                                                                             dateFormat="MMMM d, yyyy h:mm aa"
                                                                              className="w-full p-2 border border-gray-300 rounded"
+                                                                             minDate={new Date()}
                                                                       />
+                                                                      {errors.startDate && <p className="text-red-500 text-sm mt-1">{errors.startDate}</p>}
                                                                </div>
 
+                                                               {/* End Date Picker (Duration) */}
                                                                <div>
-                                                                      <label className="block text-gray-700 mb-1">Start Date</label>
-                                                                      <input
-                                                                             type="text"
-                                                                             value={editingContest.startDate}
-                                                                             onChange={e => setEditingContest({ ...editingContest, startDate: e.target.value })}
+                                                                      <label className="block text-gray-700 mb-1">End Date & Time</label>
+                                                                      <DatePicker
+                                                                             selected={editingContest.duration ? new Date(editingContest.duration) : null}
+                                                                             onChange={(date: Date | null) => date && setEditingContest({
+                                                                                    ...editingContest,
+                                                                                    duration: date.toISOString()
+                                                                             })}
+                                                                             showTimeSelect
+                                                                             timeFormat="HH:mm"
+                                                                             timeIntervals={15}
+                                                                             dateFormat="MMMM d, yyyy h:mm aa"
                                                                              className="w-full p-2 border border-gray-300 rounded"
+                                                                             minDate={editingContest.startDate ? new Date(editingContest.startDate) : new Date()}
                                                                       />
+                                                                      {errors.duration && <p className="text-red-500 text-sm mt-1">{errors.duration}</p>}
+                                                                      {editingContest.startDate && editingContest.duration && (
+                                                                             <p className="text-sm text-gray-500 mt-1">
+                                                                                    Duration: {calculateDuration(editingContest.startDate, editingContest.duration)}
+                                                                             </p>
+                                                                      )}
                                                                </div>
                                                         </div>
 
@@ -461,6 +552,7 @@ export default function ManageContests() {
                                                                              </div>
                                                                       )}
                                                                </div>
+                                                               {errors.coverImage && <p className="text-red-500 text-sm mt-1">{errors.coverImage}</p>}
                                                         </div>
 
                                                         <div className="space-y-4">
@@ -472,6 +564,7 @@ export default function ManageContests() {
                                                                              onChange={e => setNewContest({ ...newContest, title: e.target.value })}
                                                                              className="w-full p-2 border border-gray-300 rounded"
                                                                       />
+                                                                      {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
                                                                </div>
 
                                                                <div>
@@ -500,26 +593,47 @@ export default function ManageContests() {
                                                                       </select>
                                                                </div>
 
+                                                               {/* Start Date Picker */}
                                                                <div>
-                                                                      <label className="block text-gray-700 mb-1">Duration</label>
-                                                                      <input
-                                                                             type="text"
-                                                                             value={newContest.duration}
-                                                                             onChange={e => setNewContest({ ...newContest, duration: e.target.value })}
+                                                                      <label className="block text-gray-700 mb-1">Start Date & Time</label>
+                                                                      <DatePicker
+                                                                             selected={newContest.startDate ? new Date(newContest.startDate) : null}
+                                                                             onChange={(date: Date | null) => date && setNewContest({
+                                                                                    ...newContest,
+                                                                                    startDate: date.toISOString()
+                                                                             })}
+                                                                             showTimeSelect
+                                                                             timeFormat="HH:mm"
+                                                                             timeIntervals={15}
+                                                                             dateFormat="MMMM d, yyyy h:mm aa"
                                                                              className="w-full p-2 border border-gray-300 rounded"
-                                                                             placeholder="e.g. 2 hours"
+                                                                             minDate={new Date()}
                                                                       />
+                                                                      {errors.startDate && <p className="text-red-500 text-sm mt-1">{errors.startDate}</p>}
                                                                </div>
 
+                                                               {/* End Date Picker (Duration) */}
                                                                <div>
-                                                                      <label className="block text-gray-700 mb-1">Start Date</label>
-                                                                      <input
-                                                                             type="text"
-                                                                             value={newContest.startDate}
-                                                                             onChange={e => setNewContest({ ...newContest, startDate: e.target.value })}
+                                                                      <label className="block text-gray-700 mb-1">End Date & Time</label>
+                                                                      <DatePicker
+                                                                             selected={newContest.duration ? new Date(newContest.duration) : null}
+                                                                             onChange={(date: Date | null) => date && setNewContest({
+                                                                                    ...newContest,
+                                                                                    duration: date.toISOString()
+                                                                             })}
+                                                                             showTimeSelect
+                                                                             timeFormat="HH:mm"
+                                                                             timeIntervals={15}
+                                                                             dateFormat="MMMM d, yyyy h:mm aa"
                                                                              className="w-full p-2 border border-gray-300 rounded"
-                                                                             placeholder="e.g. 13/2/2025"
+                                                                             minDate={newContest.startDate ? new Date(newContest.startDate) : new Date()}
                                                                       />
+                                                                      {errors.duration && <p className="text-red-500 text-sm mt-1">{errors.duration}</p>}
+                                                                      {newContest.startDate && newContest.duration && (
+                                                                             <p className="text-sm text-gray-500 mt-1">
+                                                                                    Duration: {calculateDuration(newContest.startDate, newContest.duration)}
+                                                                             </p>
+                                                                      )}
                                                                </div>
                                                         </div>
 

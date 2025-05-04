@@ -31,7 +31,7 @@ const Sidebar: React.FC<SidebarProps> = ({ items }) => {
        return (
               <>
                      {/* Mobile menu button */}
-                     {isMobile && (
+                     {true && (
                             <button
                                    onClick={() => setIsOpen(!isOpen)}
                                    className="fixed top-4 left-4 z-50 p-2 rounded-md bg-secondary text-primary shadow-lg"
@@ -55,7 +55,7 @@ const Sidebar: React.FC<SidebarProps> = ({ items }) => {
 
                      {/* Sidebar */}
                      <AnimatePresence>
-                            {(!isMobile || isOpen) && (
+                            {(isOpen) && (
                                    <motion.div
                                           initial={{ x: isMobile ? -300 : -20, opacity: 0 }}
                                           animate={{ x: 0, opacity: 1 }}
@@ -160,7 +160,7 @@ const Sidebar: React.FC<SidebarProps> = ({ items }) => {
 
                      {/* Overlay for mobile */}
                      <AnimatePresence>
-                            {isMobile && isOpen && (
+                            {isOpen && (
                                    <motion.div
                                           initial={{ opacity: 0 }}
                                           animate={{ opacity: 0.5 }}
