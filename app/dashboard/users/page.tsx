@@ -1,16 +1,14 @@
 "use client";
 import { useState } from "react";
-import { FiSearch, FiChevronLeft, FiChevronRight, FiMoreVertical, FiEdit, FiCheck } from "react-icons/fi";
+import { FiSearch, FiChevronLeft, FiChevronRight, FiMoreVertical, FiEdit, FiCheck, FiX } from "react-icons/fi";
 import { FaRegCalendarAlt } from "react-icons/fa";
-import Sidebar from "@/components/Sidebar";
-import { SidebarItem } from "@/types";
-import { TbMessageReport } from "react-icons/tb";
-import { FiLogOut, FiSettings, FiUsers } from "react-icons/fi";
-import { PiRankingBold } from "react-icons/pi";
-import { TfiGallery } from "react-icons/tfi";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 export default function UserDashboard() {
-       type UserStatus = "active" | "inactive" | "pending" | "banned";
+       type BanStatus = "BannedFromChat" | "BannedFromPost" | "BannedFromInteract" | "BannedFromContest" | "FullBan";
+       type UserStatus = "active" | BanStatus;
 
        interface User {
               id: number;
@@ -18,6 +16,7 @@ export default function UserDashboard() {
               date: string;
               status: UserStatus;
               avatar?: string;
+              banReasons?: BanStatus[]; // For multiple ban reasons
        }
 
        // Generate random avatars using DiceBear API
@@ -26,18 +25,33 @@ export default function UserDashboard() {
 
        const [users, setUsers] = useState<User[]>([
               { id: 1, name: "Khalid Khan", date: "3/4/2023", status: "active", avatar: generateAvatar("Khalid Khan") },
-              { id: 2, name: "Essam Ali", date: "3/4/2023", status: "inactive", avatar: generateAvatar("Essam Ali") },
+              { id: 2, name: "Essam Ali", date: "3/4/2023", status: "active", avatar: generateAvatar("Essam Ali") },
               { id: 3, name: "Mickel Alan", date: "3/4/2023", status: "active", avatar: generateAvatar("Mickel Alan") },
-              { id: 4, name: "Walid Yahia", date: "3/4/2023", status: "pending", avatar: generateAvatar("Walid Yahia") },
+              { id: 4, name: "Walid Yahia", date: "3/4/2023", status: "active", avatar: generateAvatar("Walid Yahia") },
               { id: 5, name: "Khalid Khan", date: "3/4/2023", status: "active", avatar: generateAvatar("Khalid K") },
-              { id: 6, name: "Sarah Ahmed", date: "3/4/2023", status: "banned", avatar: generateAvatar("Sarah Ahmed") },
+              {
+                     id: 6,
+                     name: "Sarah Ahmed",
+                     date: "3/4/2023",
+                     status: "BannedFromPost",
+                     banReasons: ["BannedFromPost"],
+                     avatar: generateAvatar("Sarah Ahmed")
+              },
               { id: 7, name: "Mohammed Ali", date: "3/4/2023", status: "active", avatar: generateAvatar("Mohammed Ali") },
               { id: 8, name: "Khalid Khan", date: "3/4/2023", status: "active", avatar: generateAvatar("Khalid K") },
-              { id: 9, name: "Sarah Ahmed", date: "3/4/2023", status: "banned", avatar: generateAvatar("Sarah Ahmed") },
+              {
+                     id: 9,
+                     name: "Sarah Ahmed",
+                     date: "3/4/2023",
+                     status: "FullBan",
+                     banReasons: ["FullBan"],
+                     avatar: generateAvatar("Sarah Ahmed")
+              },
               { id: 10, name: "Mohammed Ali", date: "3/4/2023", status: "active", avatar: generateAvatar("Mohammed Ali") },
        ]);
 
        const [editingUserId, setEditingUserId] = useState<number | null>(null);
+       const [editingBanReasons, setEditingBanReasons] = useState<BanStatus[]>([]);
        const [searchTerm, setSearchTerm] = useState("");
        const [currentPage, setCurrentPage] = useState(1);
        const usersPerPage = 7;
@@ -46,16 +60,53 @@ export default function UserDashboard() {
               active: "bg-green-500",
               inactive: "bg-gray-500",
               pending: "bg-yellow-500",
-              banned: "bg-red-500",
+              BannedFromChat: "bg-red-500",
+              BannedFromPost: "bg-red-500",
+              BannedFromInteract: "bg-red-500",
+              BannedFromContest: "bg-red-500",
+              FullBan: "bg-red-700",
        };
 
-       const statusOptions: UserStatus[] = ["active", "inactive", "pending", "banned"];
+       const statusOptions: UserStatus[] = ["active"];
+       const banOptions: BanStatus[] = ["BannedFromChat", "BannedFromPost", "BannedFromInteract", "BannedFromContest", "FullBan"];
 
        const handleStatusChange = (userId: number, newStatus: UserStatus) => {
               setUsers(users.map(user =>
-                     user.id === userId ? { ...user, status: newStatus } : user
+                     user.id === userId ? { ...user, status: newStatus, banReasons: newStatus === "active" ? [] : user.banReasons } : user
               ));
               setEditingUserId(null);
+       };
+
+       const handleBanReasonsChange = (userId: number, reasons: BanStatus[]) => {
+              setUsers(users.map(user =>
+                     user.id === userId ? {
+                            ...user,
+                            status: reasons.length > 0 ? reasons[0] : "active", // Use first ban reason as status or default to active
+                            banReasons: reasons
+                     } : user
+              ));
+       };
+
+       const startBanEditing = (user: User) => {
+              setEditingUserId(user.id);
+              setEditingBanReasons(user.banReasons || []);
+       };
+
+       const saveBanReasons = (userId: number) => {
+              handleBanReasonsChange(userId, editingBanReasons);
+              setEditingUserId(null);
+       };
+
+       const toggleBanReason = (reason: BanStatus) => {
+              if (reason === "FullBan") {
+                     setEditingBanReasons(["FullBan"]);
+              } else if (editingBanReasons.includes("FullBan")) {
+                     setEditingBanReasons([reason]);
+              } else if (editingBanReasons.includes(reason)) {
+                     setEditingBanReasons(editingBanReasons.filter(r => r !== reason));
+              } else {
+                     setEditingBanReasons([...editingBanReasons, reason]);
+              }
        };
 
        const filteredUsers = users.filter(user =>
@@ -68,11 +119,15 @@ export default function UserDashboard() {
        const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
        const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
 
-       
+       const formatStatusText = (status: UserStatus) => {
+              return status
+                     .replace(/([A-Z])/g, ' $1')
+                     .replace(/^./, str => str.toUpperCase())
+                     .trim();
+       };
 
        return (
               <div className="flex min-h-screen w-full absolute bg-font pt-12 md:pt-0">
-                     
                      <main className="flex-1 md:ml-64 p-4 md:p-8">
                             <div className="max-w-6xl mx-auto">
                                    {/* Header */}
@@ -152,21 +207,58 @@ export default function UserDashboard() {
                                                                {/* Status */}
                                                                <div className="md:col-span-3 flex items-center mb-3 md:mb-0">
                                                                       {editingUserId === user.id ? (
-                                                                             <select
-                                                                                    defaultValue={user.status}
-                                                                                    onChange={(e) => handleStatusChange(user.id, e.target.value as UserStatus)}
-                                                                                    className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                                                                             >
-                                                                                    {statusOptions.map((option) => (
-                                                                                           <option key={option} value={option}>
-                                                                                                  {option.charAt(0).toUpperCase() + option.slice(1)}
-                                                                                           </option>
-                                                                                    ))}
-                                                                             </select>
+                                                                             <div className="flex flex-col gap-2">
+                                                                                    <select
+                                                                                           defaultValue={user.status}
+                                                                                           onChange={(e) => handleStatusChange(user.id, e.target.value as UserStatus)}
+                                                                                           className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                                                                                    >
+                                                                                           {statusOptions.map((option) => (
+                                                                                                  <option key={option} value={option}>
+                                                                                                         {option.charAt(0).toUpperCase() + option.slice(1)}
+                                                                                                  </option>
+                                                                                           ))}
+                                                                                           <option value="BannedFromChat">Banned (Custom)</option>
+                                                                                    </select>
+                                                                                    {user.status !== "active" && (
+                                                                                           <Popover>
+                                                                                                  <PopoverTrigger className="text-xs text-primary hover:underline">
+                                                                                                         {editingBanReasons.length > 0
+                                                                                                                ? `${editingBanReasons.length} ban reasons selected`
+                                                                                                                : "Select ban reasons"}
+                                                                                                  </PopoverTrigger>
+                                                                                                  <PopoverContent className="w-64 p-4 bg-white rounded-lg shadow-lg border border-gray-200">
+                                                                                                         <div className="space-y-3">
+                                                                                                                {banOptions.map((option) => (
+                                                                                                                       <div key={option} className="flex items-center space-x-2">
+                                                                                                                              <Checkbox
+                                                                                                                                     id={`${user.id}-${option}`}
+                                                                                                                                     checked={editingBanReasons.includes(option)}
+                                                                                                                                     onChange={() => toggleBanReason(option)}
+                                                                                                                              />
+                                                                                                                              <Label htmlFor={`${user.id}-${option}`} className="text-sm">
+                                                                                                                                     {formatStatusText(option)}
+                                                                                                                              </Label>
+                                                                                                                       </div>
+                                                                                                                ))}
+                                                                                                         </div>
+                                                                                                  </PopoverContent>
+                                                                                           </Popover>
+                                                                                    )}
+                                                                             </div>
                                                                       ) : (
                                                                              <>
                                                                                     <span className={`w-2 h-2 rounded-full ${statusColors[user.status]} mr-2`}></span>
-                                                                                    <span className="capitalize text-gray-700">{user.status}</span>
+                                                                                    <div className="flex flex-col">
+                                                                                           <span className="capitalize text-gray-700">
+                                                                                                  {formatStatusText(user.status)}
+                                                                                           </span>
+                                                                                           {user.banReasons && user.banReasons.length > 1 && (
+                                                                                                  <span className="text-xs text-gray-500">
+                                                                                                         +{user.banReasons.length - 1} more restrictions
+                                                                                                  </span>
+                                                                                           )}
+                                                                                    </div>
                                                                              </>
                                                                       )}
                                                                </div>
@@ -174,23 +266,29 @@ export default function UserDashboard() {
                                                                {/* Actions */}
                                                                <div className="md:col-span-2 flex justify-end items-center">
                                                                       {editingUserId === user.id ? (
-                                                                             <button
-                                                                                    onClick={() => setEditingUserId(null)}
-                                                                                    className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors text-sm font-medium mr-2 flex items-center"
-                                                                             >
-                                                                                    <FiCheck className="mr-1" /> Save
-                                                                             </button>
+                                                                             <div className="flex">
+                                                                                    <button
+                                                                                           onClick={() => saveBanReasons(user.id)}
+                                                                                           className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors text-sm font-medium mr-2 flex items-center"
+                                                                                    >
+                                                                                           <FiCheck className="mr-1" /> Save
+                                                                                    </button>
+                                                                                    <button
+                                                                                           onClick={() => setEditingUserId(null)}
+                                                                                           className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors text-sm font-medium flex items-center"
+                                                                                    >
+                                                                                           <FiX className="mr-1" /> Cancel
+                                                                                    </button>
+                                                                             </div>
                                                                       ) : (
                                                                              <button
-                                                                                    onClick={() => setEditingUserId(user.id)}
+                                                                                    onClick={() => startBanEditing(user)}
                                                                                     className="px-3 py-1.5 bg-accent hover:bg-primary text-white rounded-lg transition-colors text-sm font-medium mr-2 flex items-center"
                                                                              >
                                                                                     <FiEdit className="mr-1" /> Edit
                                                                              </button>
                                                                       )}
-                                                                      <button className="p-2 rounded-full hover:bg-gray-100 text-gray-500">
-                                                                             <FiMoreVertical />
-                                                                      </button>
+                                                                      
                                                                </div>
                                                         </div>
                                                  ))}

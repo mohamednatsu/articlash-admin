@@ -7,6 +7,13 @@ export interface Report {
        reason: string;
        postId: string;
        status?: 'pending' | 'resolved' | 'rejected';
+       comment?: Comment
+}
+
+interface Comment {
+       id: number;
+       text: string;
+       createdAt: string;
 }
 
 export interface SidebarItem {

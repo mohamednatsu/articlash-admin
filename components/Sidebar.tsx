@@ -25,8 +25,8 @@ const Sidebar: React.FC<SidebarProps> = ({ items }) => {
        }, []);
 
        // Separate regular items from action items (Settings and Log out)
-       const regularItems = items.filter(item => !['Settings', 'Log out'].includes(item.title));
-       const actionItems = items.filter(item => ['Settings', 'Log out'].includes(item.title));
+       const regularItems = items.filter(item => !['Log out'].includes(item.title));
+       const actionItems = items.filter(item => ['Log out'].includes(item.title));
 
        return (
               <>
