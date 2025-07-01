@@ -19,19 +19,11 @@ import { TbMessageReport } from "react-icons/tb";
 import { FiLogOut, FiSettings, FiUsers as FiUsersIcon } from "react-icons/fi";
 import { PiRankingBold } from "react-icons/pi";
 import { TfiGallery } from "react-icons/tfi";
+import { Post } from '@/lib/types';
+import axiosInstance from '@/lib/axios';
 
 type PostCategory = 'all' | 'traditional' | 'digital';
-type Post = {
-       id: string;
-       title: string;
-       userId: string;
-       username: string;
-       likes: number;
-       comments: number;
-       category: PostCategory;
-       image: string;
-       createdAt: string;
-};
+
 
 export default function AdminPosts() {
        const [posts, setPosts] = useState<Post[]>([]);
@@ -42,41 +34,88 @@ export default function AdminPosts() {
 
 
        useEffect(() => {
-              // Simulate API fetch
+
+
+              axiosInstance.get("/admindashboard/posts", {
+                     headers: {
+                            "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`
+                     }
+              })
+              .then((res) => {
+                     setPosts(res.data.data);
+                     console.log(res)
+              })
+              .catch((err) => {
+                     console.log(err)
+              })
+
+
               setTimeout(() => {
                      setPosts([
                             {
-                                   id: '1',
-                                   title: 'Red water flowers',
-                                   userId: '1.0',
-                                   username: 'Ampa Ali',
-                                   likes: 1400,
-                                   comments: 400,
-                                   category: 'traditional',
-                                   image: 'https://images.unsplash.com/photo-1606041008023-472dfb5e530f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-                                   createdAt: '2023-05-15'
+                                   id: "685ee7caba3d19de1a889d11",
+                                   title: "any thing",
+                                   description: "عضلاته مقوية قلبه ",
+                                   tags: "ابو العربي شامبو البدلة_اللي_لابسها_عادل_امام",
+                                   tools: null,
+                                   preference: "TraditionalArt",
+                                   likes: 1,
+                                   comments: 1,
+                                   shares: 0,
+                                   createdAt: "2025-06-27T20:49:46.225+02:00",
+                                   user: {
+                                          name: "saikoo stark",
+                                          userName: "saikoostark",
+                                          userId: "26447ec2-409e-46f4-8c76-b880ffb5dcaf",
+                                          profileImageUrl: "https://vvdxwhovmloehbfizuos.supabase.co/storage/v1/object/public/profile/user/c71c2e83-4d6f-4932-8168-f7900d72cc9b.jpg",
+                                          coverImageUrl: "https://vvdxwhovmloehbfizuos.supabase.co/storage/v1/object/public/profile/user/a668a093-d755-4478-939c-098bb01198bd.jpg",
+                                          isActive: true,
+                                          rank: "Unrated",
+                                          showActive: true
+                                   },
+                                   mentions: [],
+                                   media: [],
+                                   isLiked: false,
+                                   sharedPost: null
                             },
                             {
-                                   id: '2',
-                                   title: 'Digital landscape',
-                                   userId: '2.0',
-                                   username: 'Samir Khan',
-                                   likes: 890,
-                                   comments: 120,
-                                   category: 'digital',
-                                   image: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-                                   createdAt: '2023-06-20'
-                            },
-                            {
-                                   id: '3',
-                                   title: 'Abstract watercolor',
-                                   userId: '3.0',
-                                   username: 'Lina Mohamed',
-                                   likes: 2100,
-                                   comments: 350,
-                                   category: 'traditional',
-                                   image: 'https://images.unsplash.com/photo-1606041008023-472dfb5e530f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-                                   createdAt: '2023-07-10'
+                                   id: "685ee210ba3d19de1a889d0d",
+                                   title: "sss",
+                                   description: "@saikoostark@Shebl",
+                                   tags: "",
+                                   tools: "",
+                                   preference: "TraditionalArt",
+                                   likes: 0,
+                                   comments: 1,
+                                   shares: 0,
+                                   createdAt: "2025-06-27T20:25:20.323+02:00",
+                                   user: {
+                                          name: "Eslam Amin",
+                                          userName: "solom",
+                                          userId: "19e91e2c-fe69-4fdd-8182-60e3f99619ec",
+                                          profileImageUrl: "https://vvdxwhovmloehbfizuos.supabase.co/storage/v1/object/public/profile/user/02d007ce-915f-485f-874b-9c78f4beedf1.png",
+                                          coverImageUrl: null,
+                                          isActive: true,
+                                          rank: "Unrated",
+                                          showActive: true
+                                   },
+                                   mentions: [
+                                          {
+                                                 start: 0,
+                                                 length: 12,
+                                                 mentionedUserId: "26447ec2-409e-46f4-8c76-b880ffb5dcaf",
+                                                 createdAt: "2025-06-27T18:25:20.379Z"
+                                          },
+                                          {
+                                                 start: 12,
+                                                 length: 6,
+                                                 mentionedUserId: "0a901710-f2d8-4542-96ec-5c3ea259141a",
+                                                 createdAt: "2025-06-27T18:25:20.379Z"
+                                          }
+                                   ],
+                                   media: [],
+                                   isLiked: false,
+                                   sharedPost: null
                             }
                      ]);
                      setIsLoading(false);
@@ -86,7 +125,7 @@ export default function AdminPosts() {
        const filteredPosts = posts.filter(post => {
               const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                      post.id.includes(searchTerm);
-              const matchesCategory = selectedCategory === 'all' || post.category === selectedCategory;
+              const matchesCategory = selectedCategory === 'all' || post.preference === selectedCategory;
               return matchesSearch && matchesCategory;
        });
 
@@ -97,7 +136,7 @@ export default function AdminPosts() {
 
        return (
               <div className="flex min-h-screen w-full absolute bg-font pt-12 md:pt-0">
-                     
+
                      <main className="flex-1 md:ml-64">
                             <div className="min-h-screen bg-gray-50 font-garet p-4 md:p-8">
                                    <div className="max-w-7xl mx-auto">
@@ -168,19 +207,26 @@ export default function AdminPosts() {
                                                                <div key={post.id} className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200 hover:shadow-md transition-all">
                                                                       {/* Post Image */}
                                                                       <div className="h-48 relative overflow-hidden group">
+                                                                             {post.media[0]?.url ? 
                                                                              <img
-                                                                                    src={post.image}
+                                                                                    src={post.media[0]?.url}
                                                                                     alt={post.title}
                                                                                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                                                                              />
+                                                                             : (
+                                                                                    <div
+                                                                                           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 bg-secondary"
+                                                                                    ></div>
+                                                                             )
+                                                                      }
                                                                              <div className="absolute bottom-2 left-2 bg-secondary/90 text-font text-xs px-2 py-1 rounded flex items-center gap-1">
-                                                                                    {post.category === 'traditional' ? (
+                                                                                    {post.preference === 'traditional' ? (
                                                                                            <FaPalette className="text-primary" />
                                                                                     ) : (
                                                                                            <FaDigitalTachograph className="text-accent" />
                                                                                     )}
                                                                                     <span>
-                                                                                           {post.category === 'traditional' ? 'Traditional' : 'Digital'}
+                                                                                           {post.preference === 'traditional' ? 'Traditional' : 'Digital'}
                                                                                     </span>
                                                                              </div>
                                                                       </div>
@@ -191,10 +237,14 @@ export default function AdminPosts() {
                                                                                     {post.title}
                                                                              </h3>
 
+                                                                             <p className="text-lg font-bold text-secondary mb-3 line-clamp-2">
+                                                                                    {post.description}
+                                                                             </p>
+
                                                                              <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
                                                                                     <FiUser className="text-primary" />
                                                                                     <span>
-                                                                                           {post.username} <span className="text-xs bg-gray-100 px-1.5 py-0.5 rounded">ID: {post.userId}</span>
+                                                                                           {post.user.userName} <span className="text-xs bg-gray-100 px-1.5 py-0.5 rounded">ID: {post.id}</span>
                                                                                     </span>
                                                                              </div>
 

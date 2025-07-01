@@ -13,6 +13,7 @@
     "@radix-ui/react-popover": "^1.1.14",
     "@types/react-datepicker": "^6.2.0",
     "articlash-admin": "file:",
+    "axios": "^1.10.0",
     "framer-motion": "^12.7.3",
     "heroicons": "^2.2.0",
     "motion": "^12.7.3",
